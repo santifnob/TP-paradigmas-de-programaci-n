@@ -47,7 +47,7 @@ Object subclass: #Pelicula
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
 Empleado subclass: #Permanente
-	instanceVariableNames: 'plus'
+	instanceVariableNames: 'porcentajePlus'
 	classVariableNames: 'SueldoBasico'
 	poolDictionaries: ''
 	classInstanceVariableNames: ''!
@@ -235,7 +235,7 @@ mostrarPeliculas: pelis
 				tab;
 				show: 'Presupuesto asignado: ' , peli presupuestoAsignado printString;
 				tab;
-				show: 'Presupuesto remanente: ' , peli presupuestoRemanente printString;
+				show: 'Presupuesto remanente: ' , peli calcularPreRem printString;
 				tab;
 				cr.
 			Transcript
@@ -250,9 +250,10 @@ mostrarPeliculas: pelis
 						show: '-Tipo: ' , unEmpleado class;
 						tab;
 						show: 'Nombre y apellido: ' , unEmpleado nombre , ' ' , unEmpleado apellido;
-						tab;
-						show: 'Total cobrado: ' , unEmpleado calcularTotalCobrado;
-						cr]]! !
+						tab.
+					(unEmpleado isKindOf: Permanente) ifTrue: [Transcript show: (unEmpleado calcularCobradoListado: (peli calcularPreRem)) printString; cr].
+					(unEmpleado isKindOf: Permanente) ifFalse: [Transcript show: (unEmpleado calcularTotalCobrado: (peli presupuestoAsignado) printString); cr.]]]
+! !
 !EstudioCinematocrafico class categoriesForMethods!
 mostrarPeliculas:!public! !
 !
@@ -390,8 +391,15 @@ Permanente comment: ''!
 !Permanente categoriesForClass!Kernel-Objects! !
 !Permanente methodsFor!
 
-calcularTotalCobrado: unPresupuestoAsignado
+calcularCobradoListado: presupuestoRemanente
+|plus|
+plus := (porcentajePlus / 100) * presupuestoRemanente.
 ^(plus + SueldoBasico).
+
+!
+
+calcularTotalCobrado: unPresupuestoAsignado
+^(SueldoBasico).
 !
 
 cargarDatos
@@ -400,16 +408,18 @@ self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
 self plus: (Prompter prompt: 'Plus: ').!
 
-plus
-^plus.!
+porcentajePlus
+^porcentajePlus.!
 
-plus: unPlus
-plus := unPlus.! !
+porcentajePlus: unPorPlus
+porcentajePlus := unPorPlus.
+! !
 !Permanente categoriesForMethods!
+calcularCobradoListado:!public! !
 calcularTotalCobrado:!public! !
 cargarDatos!public! !
-plus!public! !
-plus:!public! !
+porcentajePlus!public! !
+porcentajePlus:!public! !
 !
 
 !Permanente class methodsFor!
