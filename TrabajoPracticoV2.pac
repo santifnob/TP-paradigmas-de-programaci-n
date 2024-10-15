@@ -149,7 +149,7 @@ cargarEmpleados
 					tipo = 'Equipo de dirección' ifTrue: [unEmpleado := EquipoDireccion iniEquipoDirec].
 					self agregarEmpleado: unEmpleado.].
 
-			opcion := MessageBox confirm: 'Desea continuar con la carga del personal?']!
+			opcion := MessageBox confirm: '¿Desea continuar con la carga del personal?']!
 
 cargarPeliculas
 |peli bandera bandera2 unEmpleado unDni totalCobrado|
@@ -165,19 +165,18 @@ bandera := true.
 	(bandera2) ifTrue: [
 		unDni := Prompter prompt: 'Ingresar un DNI:' caption: 'Ingreso de empleados'.
 		unEmpleado := self buscarDni: unDni listaEmpleados: (self empleados).  "devuelve los datos del empleado si lo encontro, y 0 si no"
-		
-		"Dar de alta el empleado en el sistema en caso de que no exista?"
+
 		(unEmpleado = 0) ifTrue: [MessageBox notify: 'El empleado que ingreso no existe en el sistema'].
 		
 		(unEmpleado = 0) ifFalse: [
 			totalCobrado := unEmpleado calcularTotalCobrado: (peli presupuestoAsignado).
-			((peli calcularPreRem) >= totalCobrado) ifTrue: [peli agregarEmpleadoPeli: unEmpleado].].
+			((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleado: unEmpleado.].].
 
-		(MessageBox confirm: 'Desea seguir añadiendo empleados?') ifTrue: [bandera2 := false]. ].
+		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifTrue: [bandera2 := false]. ].
 	
 	self agregarPelicula: peli].
 	
-	(MessageBox confirm: 'Desea seguir cargando peliculas?') ifTrue: [bandera := false].
+	(MessageBox confirm: '¿Desea seguir cargando peliculas?') ifTrue: [bandera := false].
 
 
 !
@@ -233,9 +232,9 @@ mostrarPeliculas: pelis
 				tab;
 				show: 'título: ' , peli titulo;
 				tab;
-				show: 'Presupuesto asignado: ' , peli presupuestoAsignado printString;
+				show: 'Presupuesto asignado: ' , (peli presupuestoAsignado) printString;
 				tab;
-				show: 'Presupuesto remanente: ' , peli calcularPreRem printString;
+				show: 'Presupuesto remanente: ' , (peli calcularPreRem * ((100 - peli porcentajeAcum) / 100)) printString;
 				tab;
 				cr.
 			Transcript
@@ -247,7 +246,7 @@ mostrarPeliculas: pelis
 					[:unEmpleado |
 					Transcript
 						tab;
-						show: '-Tipo: ' , unEmpleado class;
+						show: 'Tipo: ' , unEmpleado class;
 						tab;
 						show: 'Nombre y apellido: ' , unEmpleado nombre , ' ' , unEmpleado apellido;
 						tab.
@@ -292,6 +291,11 @@ empleados := (OrderedCollection new).
 
 !
 
+cargarPelicula
+titulo:= Prompter prompt: 'Ingrese titulo: '.
+fecha:= Prompter prompt: 'Ingrese fecha: '.
+presupuestoAsignado := Prompter prompt: 'Ingrese presupuesto asignado: '!
+
 codigo
 ^codigo.
 !
@@ -323,6 +327,11 @@ iniPresupuestoRemanente
 presupuestoRemanente := presupuestoAsignado.
 !
 
+porcentajeAcum
+|sumaTotal|
+sumaTotal := empleados inject: 0 into: [:acum :unEmpleado | acum = acum + unEmpleado porcentajePlus].
+^sumaTotal!
+
 presupuestoAsignado
 ^(presupuestoAsignado).
 
@@ -333,10 +342,6 @@ presupuestoAsignado: unPres
 presupuestoAsignado := unPres.
 
 
-!
-
-presupuestoRemanente: unP
-presupuestoRemanente := unP.
 !
 
 titulo
@@ -350,15 +355,16 @@ titulo := unTitulo.
 agregarEmpleadoPeli:!public! !
 calcularPreRem!public! !
 cargarDatos!public! !
+cargarPelicula!public! !
 codigo!public! !
 codigo:!public! !
 empleados!public! !
 fecha!public! !
 fecha:mes:anio:!public! !
 iniPresupuestoRemanente!public! !
+porcentajeAcum!public! !
 presupuestoAsignado!public! !
 presupuestoAsignado:!public! !
-presupuestoRemanente:!public! !
 titulo!public! !
 titulo:!public! !
 !
@@ -408,18 +414,31 @@ self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
 self plus: (Prompter prompt: 'Plus: ').!
 
+cargarPermanente
+sueldoBasico := Prompter prompt: 'Ingrese sueldo basico: '.
+plus := Prompter prompt: 'Ingrese plus: '!
+
+plus
+	^plus!
+
 porcentajePlus
 ^porcentajePlus.!
 
 porcentajePlus: unPorPlus
 porcentajePlus := unPorPlus.
-! !
+!
+
+sueldoBasico
+	^sueldoBasico! !
 !Permanente categoriesForMethods!
 calcularCobradoListado:!public! !
 calcularTotalCobrado:!public! !
 cargarDatos!public! !
+cargarPermanente!public! !
+plus!accessing!private! !
 porcentajePlus!public! !
 porcentajePlus:!public! !
+sueldoBasico!accessing!private! !
 !
 
 !Permanente class methodsFor!

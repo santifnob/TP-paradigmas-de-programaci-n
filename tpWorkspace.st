@@ -2,6 +2,7 @@
 
 pelisCargadas := EstudioCinematocrafico new.
 pelisCargadas iniPeliculas; iniEmpleados.
+Pelicula iniUltCod.
 
 opcion := (ChoicePrompter choices: #('Cargar peliculas' 'Emitir listado' 'Cargar empleados')).
 
