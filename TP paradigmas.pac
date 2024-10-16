@@ -21,11 +21,11 @@ package globalAliases: (Set new
 	yourself).
 
 package setPrerequisites: #(
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Choice Prompter'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
-	'..\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter').
+	'C:\Users\Usuario-1\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin'
+	'C:\Users\Usuario-1\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Choice Prompter'
+	'C:\Users\Usuario-1\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Legacy Date & Time'
+	'C:\Users\Usuario-1\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\Base\Dolphin Message Box'
+	'C:\Users\Usuario-1\Documents\Dolphin Smalltalk 7\Core\Object Arts\Dolphin\MVP\Presenters\Prompters\Dolphin Prompter').
 
 package!
 
@@ -143,7 +143,7 @@ cargarEmpleados
 	[opcion] whileTrue: 
 			[tipo := ChoicePrompter choices: #('Permanente' 'Actor' 'Equipo de dirección').
 			(tipo isNil) ifFalse: 
-					[tipo := tipo printString.
+					[
 					tipo = 'Permanente' ifTrue: [unEmpleado := Permanente iniPermanente].
 					tipo = 'Actor' ifTrue: [unEmpleado := Actor iniActor].
 					tipo = 'Equipo de dirección' ifTrue: [unEmpleado := EquipoDireccion iniEquipoDirec].
@@ -172,20 +172,24 @@ bandera := true.
 			totalCobrado := unEmpleado calcularTotalCobrado: (peli presupuestoAsignado).
 			((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleado: unEmpleado.].].
 
-		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifTrue: [bandera2 := false]. ].
+		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifFalse: [bandera2 := false]. ].
 	
 	self agregarPelicula: peli].
 	
-	(MessageBox confirm: '¿Desea seguir cargando peliculas?') ifTrue: [bandera := false].
+	(MessageBox confirm: '¿Desea seguir cargando peliculas?') ifFalse: [bandera := false].
 
 
 !
 
 emitirListado
 |listado| 
-listado := OrderedCollection new.
-listado select: [:peli | ((Date today) asDays - (peli fecha) asDays) <= 30].
-listado sortUsing: [:peli1 :peli2 | peli1 fecha < peli2 fecha].
+
+listado := SortedCollection new.
+
+listado addAll: peliculas.
+
+listado := listado select: [:peli | ((Date today) asDays - (peli fecha) asDays) <= 30].
+
 ^listado.
 
 
@@ -332,7 +336,7 @@ ingresarFecha
         mes := (Prompter prompt: 'Mes: ') asNumber.
         anio := (Prompter prompt: 'Año: ') asNumber.
         f := self fechaValida: dia mes: mes anio: anio.
-        f isNil 
+        (f isNil) 
             ifTrue: [ MessageBox warning: 'Fecha no válida. Intenta de nuevo.']
     ] whileTrue: [ f isNil ].
   Transcript show: 'Fecha válida: ', f printString; cr.
@@ -430,11 +434,8 @@ cargarDatos
 self nombre: (Prompter prompt: 'Nombre: ').
 self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
-self porcentajePlus: (Prompter prompt: 'Plus: ').!
-
-cargarPermanente
-SueldoBasico := Prompter prompt: 'Ingrese sueldo basico: '.
-porcentajePlus := Prompter prompt: 'Ingrese plus: '!
+self porcentajePlus: (Prompter prompt: 'Porcentaje plus: ').
+!
 
 plus
 ^porcentajePlus!
@@ -444,19 +445,14 @@ porcentajePlus
 
 porcentajePlus: unPorPlus
 porcentajePlus := unPorPlus.
-!
-
-sueldoBasico
-	^SueldoBasico! !
+! !
 !Permanente categoriesForMethods!
 calcularCobradoListado:!public! !
 calcularTotalCobrado:!public! !
 cargarDatos!public! !
-cargarPermanente!public! !
 plus!accessing!public! !
 porcentajePlus!public! !
 porcentajePlus:!public! !
-sueldoBasico!accessing!public! !
 !
 
 !Permanente class methodsFor!
