@@ -135,7 +135,9 @@ agregarPelicula: unaPelicula
 peliculas add: unaPelicula.
 !
 
-buscarDni: unDni listaEmpleados: unaListEmp!
+buscarDni: unDni listaEmpleados: unaListEmp
+^(unaListEmp detect: [:unEmp | unEmp documento = unDni] ifNone: [nil] ).
+!
 
 cargarEmpleados
 	| unEmpleado tipo opcion |
@@ -160,17 +162,21 @@ bandera := true.
 	peli := Pelicula iniPelicula.
 	
 	bandera2 := (MessageBox confirm: '¿Desea agregar empleados a la pelicula?' ).
+
+	(MessageBox confirm: '¿Desea ver los empleados cargados en el sistema?') ifTrue: [self mostrarEmpleados.].	
 	
 	"INGRESO DE EMPLEADOS A LA PELICULA" 
 	(bandera2) ifTrue: [
 		unDni := Prompter prompt: 'Ingresar un DNI:' caption: 'Ingreso de empleados'.
 		unEmpleado := self buscarDni: unDni listaEmpleados: (self empleados).  "devuelve los datos del empleado si lo encontro, y 0 si no"
 
-		(unEmpleado = 0) ifTrue: [MessageBox notify: 'El empleado que ingreso no existe en el sistema'].
+		(unEmpleado isNil) ifTrue: [MessageBox warning: 'El empleado que se ingreso no existe en el sistema.'].
 		
-		(unEmpleado = 0) ifFalse: [
+		MessageBox notify: 'ja'.
+		
+		(unEmpleado isNil) ifFalse: [
 			totalCobrado := unEmpleado calcularTotalCobrado: (peli presupuestoAsignado).
-			((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleado: unEmpleado.].].
+			((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleado: unEmpleado.] ifFalse: [MessageBox warning: 'No alcanza el presupuesto para agregar al empleado'] .].
 
 		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifFalse: [bandera2 := false]. ].
 	
@@ -206,6 +212,14 @@ empleados := OrderedCollection new.
 
 iniPeliculas
 peliculas := OrderedCollection new.!
+
+mostrarEmpleados
+
+empleados do: [:e | Transcript show: 'Nombre: ',  e nombre ; tab; show: '| Apellido: ', e apellido; tab; show: '| DNI: ', e documento; tab. 
+	(e class = Permanente) ifTrue: [Transcript show: '| Tipo: ', (e class) printString; tab ;show: '| Porcentaje plus: ', (e porcentajePlus) printString ; cr]. 
+	(e class = Actor) ifTrue: [Transcript show: '| Tipo: ', (e class) printString; tab ;show: '| Nacionalidad: ', e nacionalidad; tab; show: '| Cachet: ', (e cachet) printString; cr.].
+	(e class = EquipoDireccion) ifTrue: [Transcript show: '| Tipo: ', (e class) printString; tab ; show: '| Nacionalidad: ', e nacionalidad; tab; show: '| Porcentaje sobre pres. asignado: ', (e porcentaje) printString; cr. ].].
+!
 
 mostrarPeliculas: listadoFechas
 	| listaEmpleados peli|
@@ -254,6 +268,7 @@ emitirListado!public! !
 empleados!public! !
 iniEmpleados!public! !
 iniPeliculas!public! !
+mostrarEmpleados!public! !
 mostrarPeliculas:!public! !
 peliculas!public! !
 !
@@ -335,7 +350,7 @@ presupuestoRemanente := presupuestoAsignado.
 
 porcentajeAcum
 |sumaTotal|
-sumaTotal := empleados inject: 0 into: [:acum :unEmpleado | acum = acum + unEmpleado porcentajePlus].
+sumaTotal := empleados inject: 0 into: [:acum :unEmpleado | acum + unEmpleado porcentajePlus].
 ^sumaTotal!
 
 presupuestoAsignado
@@ -345,7 +360,7 @@ presupuestoAsignado
 !
 
 presupuestoAsignado: unPres
-presupuestoAsignado := unPres.
+presupuestoAsignado := unPres asNumber.
 
 
 !
@@ -418,7 +433,7 @@ cargarDatos
 self nombre: (Prompter prompt: 'Nombre: ').
 self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
-self porcentajePlus: (Prompter prompt: 'Porcentaje plus: ').
+self porcentajePlus: (Prompter prompt: 'Porcentaje plus: ') asNumber.
 !
 
 plus
@@ -453,7 +468,7 @@ SueldoBasico
 !
 
 SueldoBasico: SB
-SueldoBasico := SB.
+SueldoBasico := SB asNumber.
 ! !
 !Permanente class categoriesForMethods!
 iniPermanente!public! !
@@ -498,7 +513,7 @@ self nombre: (Prompter prompt: 'Nombre: ').
 self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
 self nacionalidad: (Prompter prompt: 'Nacionalidad: ').
-self cachet: (Prompter prompt: 'Cachet: ').! !
+self cachet: (Prompter prompt: 'Cachet: ') asNumber.! !
 !Actor categoriesForMethods!
 cachet!public! !
 cachet:!public! !
@@ -531,7 +546,7 @@ self nombre: (Prompter prompt: 'Nombre: ').
 self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
 self nacionalidad: (Prompter prompt: 'Nacionalidad: ').
-self porcentaje: (Prompter prompt: 'Porcentaje: ').
+self porcentaje: (Prompter prompt: 'Porcentaje: ') asNumber.
 
 !
 
