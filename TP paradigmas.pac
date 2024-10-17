@@ -154,7 +154,7 @@ cargarEmpleados
 			opcion := MessageBox confirm: '¿Desea continuar con la carga del personal?']!
 
 cargarPeliculas
-|peli bandera bandera2 unEmpleado unDni totalCobrado|
+|peli bandera bandera2 unEmpleado empleadoRepetido repetidoOno unDni totalCobrado |
 
 bandera := true.
 
@@ -166,19 +166,26 @@ bandera := true.
 	(MessageBox confirm: '¿Desea ver los empleados cargados en el sistema?') ifTrue: [self mostrarEmpleados.].	
 	
 	"INGRESO DE EMPLEADOS A LA PELICULA" 
-	(bandera2) ifTrue: [
+	[bandera2] whileTrue: [
 		unDni := Prompter prompt: 'Ingresar un DNI:' caption: 'Ingreso de empleados'.
 		unEmpleado := self buscarDni: unDni listaEmpleados: (self empleados).  "devuelve los datos del empleado si lo encontro, y 0 si no"
 
 		(unEmpleado isNil) ifTrue: [MessageBox warning: 'El empleado que se ingreso no existe en el sistema.'].
 		
-		MessageBox notify: 'ja'.
+		repetidoOno := false.
+		empleadoRepetido := self buscarDni: unDni listaEmpleados: (peli empleados).
+		(empleadoRepetido isNil) ifFalse: [
+			MessageBox warning: 'El empleado ya es parte de la pelicula'.
+			repetidoOno = true.].
 		
-		(unEmpleado isNil) ifFalse: [
+		((unEmpleado isNil) or: [repetidoOno]) ifFalse: [
 			totalCobrado := unEmpleado calcularTotalCobrado: (peli presupuestoAsignado).
-			((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleado: unEmpleado.] ifFalse: [MessageBox warning: 'No alcanza el presupuesto para agregar al empleado'] .].
+		
+			(unEmpleado class = Permanente) ifTrue: [((peli calcularPreRem >= totalCobrado) and: [(peli porcentajeAcum + unEmpleado porcentajePlus) <= 100]) ifTrue: [peli agregarEmpleadoPeli: unEmpleado.] ifFalse: [MessageBox warning: 'No alcanza el presupuesto para agregar al empleado o el porcentaje del plus supera el 100'] .].
+			
+			(unEmpleado class = Permanente) ifFalse: [(peli calcularPreRem >= totalCobrado) ifTrue: [peli agregarEmpleadoPeli: unEmpleado.] ifFalse: [MessageBox warning: 'No alcanza el presupuesto para agregar al empleado'] .].].         "ACA SE HACE UN IF PARA VER QUE TIPO DE COMPARACION SE NECESITA PARA EL PRES REM"
 
-		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifFalse: [bandera2 := false]. ].
+		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifFalse: [bandera2 := false].].
 	
 	self agregarPelicula: peli.
 	
