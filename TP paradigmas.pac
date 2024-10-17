@@ -157,9 +157,9 @@ cargarPeliculas
 bandera := true.
 
 [bandera] whileTrue: [
-	Pelicula iniUltCod.
 	peli := Pelicula iniPelicula.
-	bandera2 := true.
+	
+	bandera2 := (MessageBox confirm: '¿Desea agregar empleados a la pelicula?' ).
 	
 	"INGRESO DE EMPLEADOS A LA PELICULA" 
 	(bandera2) ifTrue: [
@@ -174,23 +174,24 @@ bandera := true.
 
 		(MessageBox confirm: '¿Desea seguir añadiendo empleados?') ifFalse: [bandera2 := false]. ].
 	
-	self agregarPelicula: peli].
+	self agregarPelicula: peli.
 	
-	(MessageBox confirm: '¿Desea seguir cargando peliculas?') ifFalse: [bandera := false].
+	(MessageBox confirm: '¿Desea seguir cargando peliculas?') ifFalse: [bandera := false].].
 
 
 !
 
 emitirListado
-|listado| 
+|listadoFechas listadoTreintaDias| 
 
-listado := SortedCollection new.
+listadoFechas := SortedCollection new.
+listadoTreintaDias := SortedCollection new.
 
-listado addAll: peliculas.
+listadoTreintaDias := (peliculas select: [:peli | ((Date today) asDays - (peli fecha) asDays) <= 30]).
 
-listado := listado select: [:peli | ((Date today) asDays - (peli fecha) asDays) <= 30].
+listadoFechas addAll: (listadoTreintaDias collect: [:unaPeli | unaPeli fecha.]) .
 
-^listado.
+^listadoFechas.
 
 
 
@@ -206,31 +207,14 @@ empleados := OrderedCollection new.
 iniPeliculas
 peliculas := OrderedCollection new.!
 
-peliculas
-^peliculas.
-! !
-!EstudioCinematocrafico categoriesForMethods!
-agregarEmpleado:!public! !
-agregarPelicula:!public! !
-buscarDni:listaEmpleados:!public! !
-cargarEmpleados!public! !
-cargarPeliculas!public! !
-emitirListado!public! !
-empleados!public! !
-iniEmpleados!public! !
-iniPeliculas!public! !
-peliculas!public! !
-!
-
-!EstudioCinematocrafico class methodsFor!
-
-mostrarPeliculas: pelis
-	| listaEmpleados |
+mostrarPeliculas: listadoFechas
+	| listaEmpleados peli|
 	Transcript clear.
-	pelis do: 
-			[:peli |
+	listadoFechas do: 
+			[:unaFecha |
+			peli := peliculas detect: [:unaPeli | unaPeli fecha = unaFecha].
 			Transcript
-				show: 'Fecha creación; ' , peli fecha printString;
+				show: 'Fecha creación; ' , unaFecha printString;
 				tab;
 				show: 'Codigo: ' , peli codigo;
 				tab;
@@ -245,7 +229,7 @@ mostrarPeliculas: pelis
 				tab;
 				show: 'Miembros del staff: ';
 				cr.
-			listaEmpleados := pelis empleados.
+			listaEmpleados := peli empleados.
 			listaEmpleados do: 
 					[:unEmpleado |
 					Transcript
@@ -255,10 +239,23 @@ mostrarPeliculas: pelis
 						show: 'Nombre y apellido: ' , unEmpleado nombre , ' ' , unEmpleado apellido;
 						tab.
 					(unEmpleado isKindOf: Permanente) ifTrue: [Transcript show: (unEmpleado calcularCobradoListado: (peli calcularPreRem)) printString; cr].
-					(unEmpleado isKindOf: Permanente) ifFalse: [Transcript show: (unEmpleado calcularTotalCobrado: (peli presupuestoAsignado) printString); cr.]]]
+					(unEmpleado isKindOf: Permanente) ifFalse: [Transcript show: (unEmpleado calcularTotalCobrado: (peli presupuestoAsignado) printString); cr.]]]!
+
+peliculas
+^peliculas.
 ! !
-!EstudioCinematocrafico class categoriesForMethods!
+!EstudioCinematocrafico categoriesForMethods!
+agregarEmpleado:!public! !
+agregarPelicula:!public! !
+buscarDni:listaEmpleados:!public! !
+cargarEmpleados!public! !
+cargarPeliculas!public! !
+emitirListado!public! !
+empleados!public! !
+iniEmpleados!public! !
+iniPeliculas!public! !
 mostrarPeliculas:!public! !
+peliculas!public! !
 !
 
 Pelicula guid: (GUID fromString: '{1c07fe4d-5336-481c-869c-a1b0efeada8c}')!
@@ -291,11 +288,6 @@ empleados := (OrderedCollection new).
 
 !
 
-cargarPelicula
-titulo:= Prompter prompt: 'Ingrese titulo: '.
-fecha:= Prompter prompt: 'Ingrese fecha: '.
-presupuestoAsignado := Prompter prompt: 'Ingrese presupuesto asignado: '!
-
 codigo
 ^codigo.
 !
@@ -323,25 +315,19 @@ fecha: unDia mes: unMes anio: unAnio
 
 !
 
-fechaValida: dia mes: mes anio: anio
-|f|
-    ^[ f := Date newDay: dia month: mes year: anio. f]
-        on: Error
-        do: [ :ex | nil ]. !
-
 ingresarFecha
-    | dia mes anio f|
-    [ 
-        dia := (Prompter prompt: 'Día: ') asNumber.
-        mes := (Prompter prompt: 'Mes: ') asNumber.
-        anio := (Prompter prompt: 'Año: ') asNumber.
-        f := self fechaValida: dia mes: mes anio: anio.
-        (f isNil) 
-            ifTrue: [ MessageBox warning: 'Fecha no válida. Intenta de nuevo.']
-    ] whileTrue: [ f isNil ].
-  Transcript show: 'Fecha válida: ', f printString; cr.
+|dia mes anio|
+dia := (Prompter prompt: 'Día: ') asNumber.
+[dia > 30] whileTrue: [
+	dia := (Prompter prompt: 'Ingresar un día valido: ') asNumber.].
 
-    Transcript show: 'Fecha válida: ', f printString; cr.!
+mes := (Prompter prompt: 'Mes: ') asNumber.
+[mes > 12] whileTrue: [
+	mes := (Prompter prompt: 'Ingresar un mes valido') asNumber.].
+
+anio := (Prompter prompt: 'Año: ') asNumber.
+
+^(self fecha: dia mes: mes anio: anio).!
 
 iniPresupuestoRemanente
 presupuestoRemanente := presupuestoAsignado.
@@ -375,13 +361,11 @@ titulo := unTitulo.
 agregarEmpleadoPeli:!public! !
 calcularPreRem!public! !
 cargarDatos!public! !
-cargarPelicula!public! !
 codigo!public! !
 codigo:!public! !
 empleados!public! !
 fecha!public! !
 fecha:mes:anio:!public! !
-fechaValida:mes:anio:!public! !
 ingresarFecha!public! !
 iniPresupuestoRemanente!public! !
 porcentajeAcum!public! !

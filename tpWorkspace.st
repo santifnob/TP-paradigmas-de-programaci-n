@@ -6,7 +6,7 @@ pelisCargadas := EstudioCinematocrafico new.
 pelisCargadas iniPeliculas; iniEmpleados.
 Pelicula iniUltCod.
 
-opcion := (ChoicePrompter choices: #('Cargar peliculas' 'Emitir listado' 'Cargar empleados')).
+opcion := (ChoicePrompter choices: #('Cargar empleados' 'Cargar peliculas' 'Emitir listado')).
 
 [opcion isNil] whileFalse: [
 	(opcion = 'Cargar empleados') ifTrue: [
@@ -15,12 +15,15 @@ opcion := (ChoicePrompter choices: #('Cargar peliculas' 'Emitir listado' 'Cargar
 			ingresoSueldoBas := false.] .    "Estas dos lineas son para que el seteo del sueldo basico se haga solo una vez"
 		pelisCargadas cargarEmpleados].
 	
-	(opcion = 'Cargar peliculas') ifTrue: [pelisCargadas cargarPeliculas].
+	(opcion = 'Cargar peliculas') ifTrue: [
+		pelisCargadas cargarPeliculas.
+		
+		(pelisCargadas peliculas) do: [:p | Transcript show: 'Nombre pelicula: ',  p titulo; tab; show: 'Codigo: ', (p codigo) printString; tab; show: 'Fecha creacion: ', (p fecha) printString; tab; show: 'Presupuesto asignado: ', (p presupuestoAsignado) printString; cr. ]. ].
 	
 	(opcion = 'Emitir listado') ifTrue: [
 		listado := pelisCargadas emitirListado.
-		EstudioCinematocrafico mostrarPeliculas: listado.].
-	opcion := ChoicePrompter choices: #('Cargar peliculas' 'Emitir listado' 'Cargar empleados').].
+		pelisCargadas mostrarPeliculas: listado.].
+	opcion := ChoicePrompter choices: #('Cargar empleados' 'Cargar peliculas' 'Emitir listado').].
 
 
 
