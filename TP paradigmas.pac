@@ -246,9 +246,14 @@ empleados do: [:e | Transcript show: 'Nombre: ',  e nombre ; tab; show: '| Apell
 	(e class = EquipoDireccion) ifTrue: [Transcript show: '| Tipo: ', (e class) printString; tab ; show: '| Nacionalidad: ', e nacionalidad; tab; show: '| Porcentaje sobre pres. asignado: ', (e porcentaje) printString, '%'; cr. ].].
 !
 
-mostrarPeliculas: listadoFechas
-"Muestra la peliculas que le pasa por listado"
-	| listaEmpleados peli|
+mostrarPelis
+Transcript clear.
+(self peliculas) do: [:p | Transcript show: '| Nombre pelicula: ',  p titulo; tab; show: '| Codigo: ', (p codigo) printString; tab; show: '| Fecha creacion: ', (p fecha) printString; tab; show: '| Presupuesto asignado: ', (p presupuestoAsignado) printString; tab; show: '| Presupuesto remanente: ', ((p calcularPreRem) asFloat) printString ;cr. ].!
+
+mostrarPelisFiltradas: listadoFechas
+	"Muestra la peliculas que le pasa por listado"
+
+	| listaEmpleados peli |
 	Transcript clear.
 	listadoFechas do: 
 			[:unaFecha |
@@ -258,16 +263,17 @@ mostrarPeliculas: listadoFechas
 				tab;
 				show: '| Fecha creación; ' , unaFecha printString;
 				tab;
-				show: '| Codigo: ' , (peli codigo) printString;
+				show: '| Codigo: ' , peli codigo printString;
 				tab;
-				show: '| Presupuesto asignado: ' , (peli presupuestoAsignado) printString;
+				show: '| Presupuesto asignado: ' , peli presupuestoAsignado printString;
 				tab;
-				show: '| Presupuesto remanente: ' , (peli calcularPreRem * ((100 - peli porcentajeAcum) / 100)) printString;
+				show: '| Presupuesto remanente: '
+							, (peli calcularPreRem * ((100 - peli porcentajeAcum) / 100) asFloat) printString;
 				tab;
 				cr.
 			Transcript
 				tab;
-				show: '--EMPLEADOS DE "', peli titulo, '"--';
+				show: '--EMPLEADOS DE "' , peli titulo , '"--';
 				cr.
 			listaEmpleados := peli empleados.
 			listaEmpleados do: 
@@ -276,10 +282,18 @@ mostrarPeliculas: listadoFechas
 						tab;
 						show: '| Nombre y apellido: ' , unEmpleado nombre , ' ' , unEmpleado apellido;
 						tab;
-						show: '| Tipo: ' , (unEmpleado class) printString;
+						show: '| Tipo: ' , unEmpleado class printString;
 						tab.
-					(unEmpleado isKindOf: Permanente) ifTrue: [Transcript show: '| Total cobrado: ', (unEmpleado calcularCobradoListado: (peli calcularPreRem)) printString; cr].
-					(unEmpleado isKindOf: Permanente) ifFalse: [Transcript show: '| Total cobrado: ',(unEmpleado calcularTotalCobrado: (peli presupuestoAsignado) )printString; cr.].].]!
+					(unEmpleado isKindOf: Permanente)
+						ifTrue: 
+							[Transcript
+								show: '| Total cobrado: ' , ((unEmpleado calcularCobradoListado: peli calcularPreRem) asFloat) printString;
+								cr].
+					(unEmpleado isKindOf: Permanente)
+						ifFalse: 
+							[Transcript
+								show: '| Total cobrado: ' , ((unEmpleado calcularTotalCobrado: peli presupuestoAsignado) asFloat) printString;
+								cr]]]!
 
 peliculas
 "Devuelve las peliculas"
@@ -296,7 +310,8 @@ empleados!public! !
 iniEmpleados!public! !
 iniPeliculas!public! !
 mostrarEmpleados!public! !
-mostrarPeliculas:!public! !
+mostrarPelis!public! !
+mostrarPelisFiltradas:!public! !
 peliculas!public! !
 !
 
@@ -568,7 +583,9 @@ self nombre: (Prompter prompt: 'Nombre: ').
 self apellido: (Prompter prompt: 'Apellido: ').
 self documento: (Prompter prompt: 'DNI: ').
 self nacionalidad: (Prompter prompt: 'Nacionalidad: ').
-self cachet: (Prompter prompt: 'Cachet: ') asNumber.! !
+self cachet: (Prompter prompt: 'Cachet: ') asNumber.
+
+! !
 !Actor categoriesForMethods!
 cachet!public! !
 cachet:!public! !
