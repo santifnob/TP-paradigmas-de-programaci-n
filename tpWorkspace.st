@@ -30,6 +30,3 @@ opcion := (ChoicePrompter choices: #('Cargar empleados' 'Cargar peliculas' 'Emit
 
 
 
-
-
-
